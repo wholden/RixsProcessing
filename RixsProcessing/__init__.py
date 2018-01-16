@@ -109,7 +109,7 @@ class RIXS_Dataset:
             raise ValueError('load_from_files must load data before calling this method.')
             
     def _warn_parameters(self):
-        if self.parameters is None:
+        if self.parameters == {}:
             print('WARNING: parameters not set, energy will not be properly calibrated and frames will not be properly processed.')
             
     def save_csv_to_file(self, directory, prefix):

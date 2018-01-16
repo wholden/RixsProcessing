@@ -7,7 +7,7 @@ plt = pyplt #Alex, change this to xraycam.camcontrol.plt if you want to use Plot
 
 def process_runs(filenamelist,parameters = {}):
     """Processes list of files consisting of RIXS dataruns."""
-    import xraycam
+    import xraycam.camcontrol
     lineouts = []
     incidents = []
     for f in sorted(filenamelist):

@@ -7,7 +7,7 @@ plt = pyplt #Alex, change this to xraycam.camcontrol.plt if you want to use Plot
 
 def process_runs(filenamelist,parameters = {}):
     """Processes list of files consisting of RIXS dataruns."""
-    import xraycam
+    import xraycam.camcontrol
     lineouts = []
     incidents = []
     for f in sorted(filenamelist):
@@ -23,7 +23,7 @@ def parse_filename(filename):
     """Parses a directory string containing a run output.  
     For example, to be used with the output of glob or os.listdir"""
     import re
-    parser = re.compile(r'.*/(.*:([\d\.]*))_+array.npy')
+    parser = re.compile(r'.*/(.*:([\d\.]*)_*)_array.npy')	
     match = parser.match(filename)
     return match.group(1), float(match.group(2))
 
@@ -91,7 +91,7 @@ class RIXS_Dataset:
                 plt.show()
         return lineout
     
-    def plot_rixs_plane(self, log=True, **plotkwargs):
+    def plot_rixs_plane(self, log=True, show=True, **plotkwargs):
         self._check_files_loaded()
         self._warn_parameters()
         fig, ax = pyplt.subplots(**plotkwargs)
@@ -100,7 +100,9 @@ class RIXS_Dataset:
         else:
             ploti = self.intensities
         ax.contourf(self.incidentenergies, self.emissionenergies, ploti)
-        pyplt.show()
+        if show:
+            pyplt.show()
+        return ax
         
     def _check_files_loaded(self):
         try:
@@ -123,3 +125,15 @@ class RIXS_Dataset:
         self.incidentenergies = np.loadtxt(directory+prefix+'_rixs_incidentenergies.csv', delimiter=',')
         self.emissionenergies = np.loadtxt(directory+prefix+'_rixs_emissionenergies.csv', delimiter=',')
         self.intensities = np.loadtxt(directory+prefix+'_rixs_intensities.csv', delimiter=',')
+
+    def __add__(self,other):
+        new = RIXS_Dataset()
+        new.filenamelist = self.filenamelist+other.filenamelist
+        assert (self.incidentenergies == other.incidentenergies).all(), "Error, rixs data can only be added if incidentenergies are the same"
+        assert (self.emissionenergies == other.emissionenergies).all(), "Error, rixs data can only be added if emissionenergies are the same"
+        assert (self.parameters == other.parameters), "Error, rixs data can only be added if parameters are the same"
+        new.intensities = self.intensities + other.intensities
+        new.emissionenergies = self.emissionenergies
+        new.incidentenergies = self.incidentenergies
+        new.parameters = self.parameters
+        return new
